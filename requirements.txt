@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+streamlit
+python-dotenv
+requests
+pillow
+reportlab
+concurrent-futures
+argparse
+# Add real Grok/xAI SDK, Printify API, Etsy SDK, etc. when integrating live keys
