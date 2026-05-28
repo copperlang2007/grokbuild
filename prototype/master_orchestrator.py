@@ -2,7 +2,7 @@
 """
 FastAI Income Suite - Master Orchestrator v1.0
 Consolidates all 20 methods into runnable batches.
-AI (Grok) does the heavy lifting; scripts handle setup, formatting, scaling.
+AI (OpenRouter) does the heavy lifting; scripts handle setup, formatting, scaling.
 Run: python master_orchestrator.py --help
 """
 
@@ -11,21 +11,37 @@ import json
 import argparse
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+import requests
 
-# Grok API Integration (Production-Ready Stub)
-# To connect real Grok/xAI: 
-# 1. Get API key from https://x.ai/api or Grok console
-# 2. pip install xai-sdk (or use requests to https://api.x.ai/v1/chat/completions)
-# 3. Replace this function with:
-#    import os
-#    from xai_sdk import Client  # or requests
-#    client = Client(api_key=os.getenv("XAI_API_KEY"))
-#    response = client.chat.create(model="grok-3", messages=[{"role": "user", "content": prompt}])
-#    return response.choices[0].message.content
-def grok_generate(prompt: str, max_tokens: int = 2000) -> str:
-    # Production: Replace with live xAI/Grok API call above for real generation
-    # Current: High-quality stub simulating Grok output
-    return f"[GROK-3 GENERATED - 2026] {prompt[:80]}...\n\n[Full optimized content: 600+ tokens of expert, monetizable {prompt.split()[-1] if ' ' in prompt else 'content'} ready for sale. Add your XAI_API_KEY env var for live calls.]"
+# OpenRouter Integration (Recommended - Works with Grok + 100+ models)
+# 1. Get free API key: https://openrouter.ai/keys
+# 2. Set environment variable: OPENROUTER_API_KEY=sk-or-...
+# 3. Choose any model: "x-ai/grok-3", "anthropic/claude-3.5-sonnet", "openai/gpt-4o", etc.
+def grok_generate(prompt: str, max_tokens: int = 2000, model: str = "x-ai/grok-3") -> str:
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        return "[ERROR] Please set OPENROUTER_API_KEY environment variable (get free key at https://openrouter.ai/keys)"
+    
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "HTTP-Referer": "https://github.com/copperlang2007/grokbuild",
+                "X-Title": "FastAI Income Suite v1.1"
+            },
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens,
+                "temperature": 0.7
+            },
+            timeout=60
+        )
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"[OpenRouter Error] {str(e)} - Check your API key and internet connection"
 
 def create_prompt_pack(niche: str, count: int = 50) -> str:
     """Method 1: AI Prompt Packs"""
