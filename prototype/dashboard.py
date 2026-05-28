@@ -1,9 +1,10 @@
 import streamlit as st
 import json
 from datetime import datetime
+import os
 import sys
-sys.path.append("..")  # Allow import from parent
-from .master_orchestrator import run_all_methods
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from prototype.master_orchestrator import run_all_methods
 
 st.set_page_config(page_title="FastAI Income Suite", layout="wide")
 st.title("🚀 FastAI Income Suite v1.1 - OpenRouter Edition")
