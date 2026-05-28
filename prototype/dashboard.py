@@ -1,10 +1,13 @@
 import streamlit as st
 import json
 from datetime import datetime
+import sys
+sys.path.append("..")  # Allow import from parent
+from prototype.master_orchestrator import run_all_methods
 
 st.set_page_config(page_title="FastAI Income Suite", layout="wide")
-st.title("🚀 FastAI Income Suite v1.0 - Grok Studio Edition")
-st.subheader("Turn AI into $1000/day income streams in minutes")
+st.title("🚀 FastAI Income Suite v1.1 - OpenRouter Edition")
+st.subheader("Turn AI into $1000/day income streams in minutes • Powered by OpenRouter")
 
 # Load DNA
 with open("../app-dna.json") as f:
@@ -16,6 +19,19 @@ col2.metric("Methods Available", "20", "+5 in v1.1")
 col3.metric("Projected Daily", "$150-800+", "Per user volume")
 
 st.header("One-Click Launch")
+
+# Model Selector (NEW)
+model_options = {
+    "Grok-3 (xAI)": "x-ai/grok-3",
+    "Claude 3.5 Sonnet (Anthropic)": "anthropic/claude-3.5-sonnet",
+    "GPT-4o (OpenAI)": "openai/gpt-4o",
+    "Llama 3.1 405B (Meta)": "meta-llama/llama-3.1-405b-instruct",
+    "Gemini 1.5 Pro (Google)": "google/gemini-1.5-pro"
+}
+selected_model_name = st.selectbox("🤖 Choose AI Model", list(model_options.keys()), index=0)
+selected_model = model_options[selected_model_name]
+st.caption(f"Using model: **{selected_model}** via OpenRouter")
+
 niche = st.text_input("Target Niche (e.g. productivity, fitness, finance)", "side_hustles_2026")
 methods = st.multiselect("Select Methods to Run", 
     ["prompt_packs", "micro_ebooks", "wallpapers", "pod_designs", "stock_photos", 
@@ -24,10 +40,16 @@ methods = st.multiselect("Select Methods to Run",
     default=["prompt_packs", "micro_ebooks", "wallpapers"])
 
 if st.button("🚀 EXECUTE ALL SELECTED (Master Orchestrator)"):
-    st.success("Running... (In real: calls master_orchestrator.py)")
-    st.json({"status": "SUCCESS", "niche": niche, "methods_run": len(methods), "output": f"./output/{niche}_launch_{datetime.now().strftime('%Y%m%d')}", "earnings_projection": "$420/day avg"})
+    with st.spinner(f"Generating with {selected_model_name}... This may take 30-90 seconds"):
+        try:
+            results = run_all_methods(niche=niche, methods=methods, model=selected_model)
+            st.success(f"✅ Success! Generated using {selected_model_name}")
+            st.json(results)
+            st.balloons()
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
 
 st.header("Live Earnings Tracker (Demo)")
 st.line_chart({"Prompt Packs": [120, 340, 890], "eBooks": [80, 210, 450], "Designs": [50, 180, 620]})
 
-st.caption("Red-Team Certified v5 | Grok Studio 2026 | Add your Grok API key in .env for live generation")
+st.caption("Red-Team Certified v5 | Grok Studio 2026 | Powered by OpenRouter (free key at openrouter.ai/keys)")
