@@ -43,45 +43,51 @@ def grok_generate(prompt: str, max_tokens: int = 2000, model: str = "x-ai/grok-3
     except Exception as e:
         return f"[OpenRouter Error] {str(e)} - Check your API key and internet connection"
 
-def create_prompt_pack(niche: str, count: int = 50, model: str = "x-ai/grok-3") -> str:
+def create_prompt_pack(niche: str, count: int = 50, output_dir: str = "output", model: str = "x-ai/grok-3") -> str:
     """Method 1: AI Prompt Packs"""
     content = grok_generate(f"Generate {count} expert-level LLM prompts for {niche} niche. Format as numbered list with use cases.", model=model)
-    os.makedirs("output/prompt_packs", exist_ok=True)
-    filepath = f"output/prompt_packs/{niche}_prompt_pack_{datetime.now().strftime('%Y%m%d')}.txt"
+    output_path = os.path.join(output_dir, "prompt_packs")
+    os.makedirs(output_path, exist_ok=True)
+    filepath = os.path.join(output_path, f"{niche}_prompt_pack_{datetime.now().strftime('%Y%m%d')}.txt")
     with open(filepath, "w") as f:
         f.write(content)
     return f"Prompt pack saved: {filepath} | Sell on Gumroad $9.99"
 
-def create_micro_ebook(niche: str, model: str = "x-ai/grok-3") -> str:
+def create_micro_ebook(niche: str, output_dir: str = "output", model: str = "x-ai/grok-3") -> str:
     """Method 4: Micro eBooks"""
     content = grok_generate(f"Write a 15-page micro eBook on '{niche} side hustles using AI in 2026'. Include 5 actionable steps, monetization tips, and resources.", model=model)
-    filepath = f"output/ebooks/{niche}_micro_ebook.md"
-    os.makedirs("output/ebooks", exist_ok=True)
+    output_path = os.path.join(output_dir, "ebooks")
+    os.makedirs(output_path, exist_ok=True)
+    filepath = os.path.join(output_path, f"{niche}_micro_ebook.md")
     with open(filepath, "w") as f:
         f.write(content)
     return f"eBook ready: {filepath} | Upload to Gumroad/Etsy $7-15"
 
-def generate_wallpapers(theme: str, count: int = 20, model: str = "x-ai/grok-3") -> str:
+def generate_wallpapers(theme: str, count: int = 20, output_dir: str = "output", model: str = "x-ai/grok-3") -> str:
     """Method 10: AI Wallpapers (text descriptions - real images would use separate image model)"""
-    os.makedirs("output/wallpapers", exist_ok=True)
+    output_path = os.path.join(output_dir, "wallpapers")
+    os.makedirs(output_path, exist_ok=True)
     for i in range(count):
         pass
     return f"{count} {theme} wallpapers generated | Bundle & sell on Etsy $4.99"
 
-def run_all_methods(niche: str = "productivity_ai", methods: list = None, model: str = "x-ai/grok-3"):
+def run_all_methods(niche: str = "productivity_ai", methods: list = None, output_dir: str = "output", model: str = "x-ai/grok-3"):
     if methods is None:
         methods = ["prompt_packs", "micro_ebooks", "wallpapers", "pod_designs", "stock_photos", "voiceovers", "music_loops", "meme_packs", "chatbot_templates", "headshot_packs"]
+    
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
     
     results = {}
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = {}
         for m in methods:
             if m == "prompt_packs":
-                futures[m] = executor.submit(create_prompt_pack, niche, 50, model)
+                futures[m] = executor.submit(create_prompt_pack, niche, 50, output_dir, model)
             elif m == "micro_ebooks":
-                futures[m] = executor.submit(create_micro_ebook, niche, model)
+                futures[m] = executor.submit(create_micro_ebook, niche, output_dir, model)
             elif m == "wallpapers":
-                futures[m] = executor.submit(generate_wallpapers, niche, 20, model)
+                futures[m] = executor.submit(generate_wallpapers, niche, 20, output_dir, model)
             else:
                 results[m] = f"[STUB] {m} executed for {niche} - full impl in v1.1"
         
@@ -98,12 +104,14 @@ if __name__ == "__main__":
     parser.add_argument("--niche", default="side_hustles_2026", help="Target niche")
     parser.add_argument("--methods", nargs="+", default=None, help="Specific methods to run")
     parser.add_argument("--all", action="store_true", help="Run all 20 methods")
+    parser.add_argument("--output", default="output", help="Output directory for generated files")
+    parser.add_argument("--model", default="x-ai/grok-3", help="Model to use (default: x-ai/grok-3)")
     args = parser.parse_args()
     
     if args.all:
-        res = run_all_methods(args.niche)
+        res = run_all_methods(args.niche, output_dir=args.output, model=args.model)
     else:
-        res = run_all_methods(args.niche, args.methods)
+        res = run_all_methods(args.niche, args.methods, output_dir=args.output, model=args.model)
     
     print(json.dumps(res, indent=2))
-    print("\n✅ All selected methods executed. Check ./output/ for deliverables. Add to your income app dashboard!")
+    print(f"\n✅ All selected methods executed. Check {args.output}/ for deliverables. Add to your income app dashboard!")
